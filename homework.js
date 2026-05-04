@@ -25,8 +25,14 @@ async function getProducts() {
 	// 請實作此函式
 	// 提示：
 	// 1. 使用 fetch() 發送 GET 請求
+	const response = await fetch(
+    `${BASE_URL}/api/livejs/v1/customer/${API_PATH}/products`,
+  );
 	// 2. 使用 response.json() 解析回應
+	const data = await response.json();
+	//console.log(data);
 	// 3. 回傳 data.products
+	return data.products;
 }
 
 /**
@@ -35,6 +41,12 @@ async function getProducts() {
  */
 async function getCart() {
 	// 請實作此函式
+	const response = await fetch(
+	`${BASE_URL}/api/livejs/v1/customer/${API_PATH}/carts`,
+  );
+	const data = await response.json();
+	const { carts, total, finalTotal } = data;
+	return { carts, total, finalTotal };
 }
 
 /**
@@ -48,6 +60,28 @@ async function getProductsSafe() {
 	// 2. 檢查 response.ok 判斷是否成功
 	// 3. 成功回傳 { success: true, data: [...] }
 	// 4. 失敗回傳 { success: false, error: '錯誤訊息' }
+	try {
+		const response = await fetch(
+      `${BASE_URL}/api/livejs/v1/customer/${API_PATH}/products`,
+    );
+	
+    if (!response.ok) {
+      const errorData = await response.json();
+      return {
+        success: false,
+        error: errorData.message };
+	}	
+	
+	const data = await response.json();
+    return {
+      success: true,
+      data: data.products };
+  } catch (error) {
+	console.log(error);
+    return {
+      success: false,
+      error: errorData.message };
+  }
 }
 
 // ========================================
@@ -67,6 +101,23 @@ async function addToCart(productId, quantity) {
 	// 2. body 格式：{ data: { productId: "xxx", quantity: 1 } }
 	// 3. 記得設定 headers: { 'Content-Type': 'application/json' }
 	// 4. body 要用 JSON.stringify() 轉換
+ const response = await fetch(
+    `${BASE_URL}/api/livejs/v1/customer/${API_PATH}/carts`,
+    {
+      method: "POST", // 指定 HTTP 方法
+      headers: { "Content-Type": "application/json" }, // 告訴伺服器資料格式
+      body: JSON.stringify(
+		{
+          data: { 
+			productId: productId,
+			quantity: quantity,
+        },
+      }),
+    },
+ );
+
+  const data = await response.json();
+  return data;
 }
 
 /**
@@ -80,7 +131,25 @@ async function updateCartItem(cartId, quantity) {
 	// 提示：
 	// 1. 發送 PATCH 請求
 	// 2. body 格式：{ data: { id: "購物車ID", quantity: 數量 } }
+  const response = await fetch(
+    `${BASE_URL}/api/livejs/v1/customer/${API_PATH}/carts`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(
+		{
+        data: {
+          id: cartId, // 要更新的項目 ID
+          quantity: quantity, // 新的數量
+        },
+      }),
+    },
+  );
+
+  const data = await response.json();
+  return data;
 }
+
 
 /**
  * 3. 刪除購物車特定商品
@@ -90,6 +159,15 @@ async function updateCartItem(cartId, quantity) {
 async function removeCartItem(cartId) {
 	// 請實作此函式
 	// 提示：發送 DELETE 請求到 /carts/{id}
+	const response = await fetch(
+    `${BASE_URL}/api/livejs/v1/customer/${API_PATH}/carts/${cartId}`,
+    { 
+		method: "DELETE",
+	},
+  );
+
+  const data = await response.json();
+  return data;
 }
 
 /**
@@ -99,6 +177,15 @@ async function removeCartItem(cartId) {
 async function clearCart() {
 	// 請實作此函式
 	// 提示：發送 DELETE 請求到 /carts
+	const response = await fetch(
+    `${BASE_URL}/api/livejs/v1/customer/${API_PATH}/carts`,
+    { 
+		method: "DELETE",
+	},
+  );
+
+  const data = await response.json();
+  return data;
 }
 
 // ========================================
@@ -109,14 +196,16 @@ async function clearCart() {
 請回答以下問題（可以寫在這裡或另外繳交）：
 
 1. HTTP 狀態碼的分類（1xx, 2xx, 3xx, 4xx, 5xx 各代表什麼）
-   答：
+   答：1xx 資訊性回應， 2xx 成功! 3xx 重新導向， 4xx 客戶端錯誤， 5xx 伺服器端錯誤 
 
 2. GET、POST、PATCH、PUT、DELETE 的差異
-   答：
+   答：GET 取得資料、POST 建立資料、PATCH 部分更新、PUT 完整更新、DELETE 刪除資料 
 
 3. 什麼是 RESTful API？
-   答：
-
+   答：RESTful API 是一種資源導向的設計風格，
+   基於REST (Representational State Transfer) 架構，
+   利用標準 HTTP 方法（GET、POST、PUT、DELETE）和明確的 URL 結構
+   來實現無狀態、鬆散耦合的平台獨立服務。
 
 */
 
